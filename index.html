@@ -153,6 +153,20 @@
 
     window.orbSpawnTimeout = setTimeout(startOrbCycle, 1000); // старт через 1 сек
 
+    function cmdOrbHandler(nick) {
+      console.log("Пользователь @" + nick + " обнаружил орб! Молодец!");
+      window.orbIsCatched = true;
+    }
+
+    function cmdSpawnHandler() {
+      if (!window.isOrbCycleRunning) {
+        clearTimeout(window.orbSpawnTimeout);
+        startOrbCycle();
+        console.log("Цикл орба принудительно запущен.");
+      } else {
+        console.log("Цикл уже активен, не будем запускать заново.");
+      }
+    }
 
     window.addEventListener('onEventReceived', function (obj) {
       if (!obj.detail.event) {
@@ -167,21 +181,11 @@
         
           if (data.text === "!orb" || data.text === "!орб")
           {
-            console.log("Пользователь @" + data.nick + " обнаружил орб! Молодец!");
-            
-            // TODO call webhook
-
-            window.orbIsCatched = true;
+            cmdOrbHandler(data.nick);
           }
 
           if (data.text == "!чопоорбам") {
-            if (!window.isOrbCycleRunning) {
-              clearTimeout(window.orbSpawnTimeout);
-              startOrbCycle();
-              console.log("Цикл орба принудительно запущен.");
-            } else {
-              console.log("Цикл уже активен, не будем запускать заново.");
-            }
+            cmdSpawnHandler();
           }
 
       }
