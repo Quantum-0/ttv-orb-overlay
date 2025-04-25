@@ -8,7 +8,7 @@
     html, body {
       margin: 0;
       padding: 0;
-      background: black;  // transparent
+      background: transparent;
       overflow: hidden;
       height: 100%;
     }
@@ -46,6 +46,10 @@
     const maxSpeed = 50;
     // Сила притяжения к центру
     const pullStrength = 0.005;
+    // Вытягиваем параметры из урла
+    const urlParams = new URLSearchParams(window.location.search);
+    const whSecret = urlParams.get('secret');
+    const whId = urlParams.get('id');
 
     function random(min, max) {
       return Math.random() * (max - min) + min;
@@ -165,12 +169,22 @@
       startOrbCycle();
     }, 1000);
 
+    function callWebhookCatched(user) {
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "https://api.mixitupapp.com/api/webhook/" + whId + "?secret=" + whSecret, true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify({
+          user: user
+      }));
+    }
+
     function cmdOrbHandler(nick) {
       if (!window.isOrbActive) {
         console.log("Орб не активен, игнорируем команду.");
         return;
       }
       console.log("Пользователь @" + nick + " обнаружил орб! Молодец!");
+      callWebhookCatched(nick);
       window.orbIsCatched = true;
       // Clear any existing spawn timeout to ensure 60-second delay
       if (window.orbSpawnTimeout) {
