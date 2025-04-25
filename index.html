@@ -213,8 +213,6 @@
       const data = obj.detail.event.data;
 
       if (listener === 'message') {
-        if (data.nick !== 'creatisbot') return;
-
         if (data.text === "!orb" || data.text === "!орб") {
           cmdOrbHandler(data.nick);
         }
