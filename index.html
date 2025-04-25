@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="author" content="https://www.twitch.tv/quantum075">
+  <title>Twitch Orb Overlay</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: black;  // transparent
+      overflow: hidden;
+      height: 100%;
+    }
+
+    .orb {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      background: white;
+      border-radius: 50%;
+      filter: blur(5px);
+      opacity: 0;
+      transition: opacity 3s ease;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // Количество циклов появления орба в период его активности
+    const maxIterations = 5;
+    // Время респауна/неактивности орба
+    const spawnInterval = 60 * 1000;
+    // Время видимости орба во время одного цикла
+    const movementDuration = 10 * 1000;
+    // Время плавного исчезновения (должно быть равно transition в CSS)
+    const fadeDuration = 3 * 1000;
+    // Время, в течении которого орб не видно в пробежутках между циклами видимости в активном состоянии
+    const pauseDuration = 5000;
+    // Максимальная и минимальная начальная скорость орба
+    const minStartSpeed = 25;
+    const maxStartSpeed = 35;
+    // Максимальная и минимальная скорость орба
+    const minSpeed = 10;
+    const maxSpeed = 50;
+    // Сила притяжения к центру
+    const pullStrength = 0.005;
+
+    function random(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function createOrb() {
+      const orb = document.createElement('div');
+      orb.className = 'orb';
+      orb.style.opacity = '0';
+      document.body.appendChild(orb);
+
+      // Плавное появление после следующего кадра
+      requestAnimationFrame(() => {
+        orb.style.opacity = '1';
+      });
+
+      return orb;
+    }
+
+    function animateOrb(orb, onComplete) {
+      const { innerWidth: width, innerHeight: height } = window;
+      const centerX = width / 2;
+      const centerY = height / 2;
+
+      let x = random(0, width);
+      let y = random(0, height);
+
+      orb.style.left = `${x}px`;
+      orb.style.top = `${y}px`;
+
+      let startTime = null;
+      let direction = random(0, 2 * Math.PI);
+      let speed = random(minStartSpeed, maxStartSpeed);
+      let fadingOut = false;
+
+      function update(timestamp) {
+        if (!startTime) startTime = timestamp;
+        const elapsed = timestamp - startTime;
+
+        // Исчезновение в рамках одного цикла
+        if (window.orbIsCatched || (elapsed > movementDuration && !fadingOut)) {
+          fadingOut = true;
+          orb.style.opacity = 0;
+          setTimeout(() => {
+            orb.remove();
+            window.orbIsCatched = false;
+            onComplete();
+          }, fadeDuration);
+        }
+
+        // Притяжение к центру
+        const toCenterX = centerX - x;
+        const toCenterY = centerY - y;
+        const angleToCenter = Math.atan2(toCenterY, toCenterX);
+        direction += pullStrength * Math.sin(angleToCenter - direction);
+
+        // Случайные отклонения
+        direction += random(-0.05, 0.05);
+        speed += random(-2, 2);
+        speed = Math.max(minSpeed, Math.min(speed, maxSpeed));
+
+        x += Math.cos(direction) * speed * 0.016;
+        y += Math.sin(direction) * speed * 0.016;
+
+        orb.style.left = `${x}px`;
+        orb.style.top = `${y}px`;
+
+        requestAnimationFrame(update);
+      }
+
+      requestAnimationFrame(update);
+    }
+
+    function startOrbCycle() {
+      if (window.isOrbCycleRunning) return; // предотвращаем множественные запуски
+      window.isOrbCycleRunning = true;
+      window.isOrbActive = true;
+      let iteration = 0;
+
+      function spawnNext() {
+        if (iteration >= maxIterations || window.orbIsCatched) {
+          window.isOrbActive = false;
+          window.isOrbCycleRunning = false;
+
+          if (window.orbIsCatched) {
+            console.log("Орб пойман! Следующий появится через 60 секунд.");
+          }
+
+          window.orbSpawnTimeout = setTimeout(startOrbCycle, spawnInterval);
+          window.orbIsCatched = false;
+          return;
+        }
+
+        const orb = createOrb();
+        animateOrb(orb, () => {
+          setTimeout(() => {
+            iteration++;
+            spawnNext();
+          }, pauseDuration);
+        });
+      }
+
+      spawnNext();
+    }
+
+    window.orbSpawnTimeout = setTimeout(startOrbCycle, 1000); // старт через 1 сек
+
+
+    window.addEventListener('onEventReceived', function (obj) {
+      if (!obj.detail.event) {
+        return;
+      }
+      const listener = obj.detail.listener;
+      const data = obj.detail.event.data;
+
+      if (listener === 'message') {
+          if (data.nick != 'creatisbot')
+            return;
+        
+          if (data.text === "!orb" || data.text === "!орб")
+          {
+            console.log("Пользователь @" + data.nick + " обнаружил орб! Молодец!");
+            
+            // TODO call webhook
+
+            window.orbIsCatched = true;
+          }
+
+          if (data.text == "!чопоорбам") {
+            if (!window.isOrbCycleRunning) {
+              clearTimeout(window.orbSpawnTimeout);
+              startOrbCycle();
+              console.log("Цикл орба принудительно запущен.");
+            } else {
+              console.log("Цикл уже активен, не будем запускать заново.");
+            }
+          }
+
+      }
+    });
+
+    window.orbIsCatched = false;
+    window.isOrbActive = false;
+    window.isOrbCycleRunning = false;
+  </script>
+</body>
+</html>
