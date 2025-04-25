@@ -52,6 +52,7 @@
     }
 
     function createOrb() {
+      console.log("[D]: createOrb");
       const orb = document.createElement('div');
       orb.className = 'orb';
       orb.style.opacity = '0';
@@ -66,6 +67,7 @@
     }
 
     function animateOrb(orb, onComplete) {
+      console.log("[D]: animateOrb");
       const { innerWidth: width, innerHeight: height } = window;
       const centerX = width / 2;
       const centerY = height / 2;
@@ -91,9 +93,9 @@
           orb.style.opacity = 0;
           setTimeout(() => {
             orb.remove();
-            window.orbIsCatched = false;
             onComplete();
           }, fadeDuration);
+          return; // Stop animation loop
         }
 
         // Притяжение к центру
@@ -120,22 +122,28 @@
     }
 
     function startOrbCycle() {
-      if (window.isOrbCycleRunning) return; // предотвращаем множественные запуски
+      console.log("[D]: startOrbCycle");
+      if (window.isOrbCycleRunning) return; // Предотвращаем множественные запуски
       window.isOrbCycleRunning = true;
       window.isOrbActive = true;
       let iteration = 0;
 
       function spawnNext() {
+        console.log("[D]: spawnNext");
         if (iteration >= maxIterations || window.orbIsCatched) {
           window.isOrbActive = false;
           window.isOrbCycleRunning = false;
-
           if (window.orbIsCatched) {
             console.log("Орб пойман! Следующий появится через 60 секунд.");
+            window.orbIsCatched = false;
           }
-
-          window.orbSpawnTimeout = setTimeout(startOrbCycle, spawnInterval);
-          window.orbIsCatched = false;
+          // Schedule next cycle only if not already scheduled
+          if (!window.orbSpawnTimeout) {
+            window.orbSpawnTimeout = setTimeout(() => {
+              window.orbSpawnTimeout = null;
+              startOrbCycle();
+            }, spawnInterval);
+          }
           return;
         }
 
@@ -151,24 +159,39 @@
       spawnNext();
     }
 
-    window.orbSpawnTimeout = setTimeout(startOrbCycle, 1000); // старт через 1 сек
+    // Initialize first cycle
+    window.orbSpawnTimeout = setTimeout(() => {
+      window.orbSpawnTimeout = null;
+      startOrbCycle();
+    }, 1000);
 
     function cmdOrbHandler(nick) {
+      if (!window.isOrbActive) {
+        console.log("Орб не активен, игнорируем команду.");
+        return;
+      }
       console.log("Пользователь @" + nick + " обнаружил орб! Молодец!");
       window.orbIsCatched = true;
+      // Clear any existing spawn timeout to ensure 60-second delay
+      if (window.orbSpawnTimeout) {
+        clearTimeout(window.orbSpawnTimeout);
+        window.orbSpawnTimeout = null;
+      }
     }
 
     function cmdSpawnHandler() {
-      if (!window.isOrbCycleRunning) {
-        clearTimeout(window.orbSpawnTimeout);
+      console.log("[D]: cmdSpawnHandler");
+      if (!window.isOrbCycleRunning && !window.orbSpawnTimeout) {
+        // Start a new cycle immediately
         startOrbCycle();
         console.log("Цикл орба принудительно запущен.");
       } else {
-        console.log("Цикл уже активен, не будем запускать заново.");
+        console.log("Цикл уже активен или запланирован, игнорируем команду.");
       }
     }
 
     window.addEventListener('onEventReceived', function (obj) {
+      console.log("[D]: onEventReceived");
       if (!obj.detail.event) {
         return;
       }
@@ -176,24 +199,22 @@
       const data = obj.detail.event.data;
 
       if (listener === 'message') {
-          if (data.nick != 'creatisbot')
-            return;
-        
-          if (data.text === "!orb" || data.text === "!орб")
-          {
-            cmdOrbHandler(data.nick);
-          }
+        if (data.nick !== 'creatisbot') return;
 
-          if (data.text == "!чопоорбам") {
-            cmdSpawnHandler();
-          }
+        if (data.text === "!orb" || data.text === "!орб") {
+          cmdOrbHandler(data.nick);
+        }
 
+        if (data.text === "!чопоорбам") {
+          cmdSpawnHandler();
+        }
       }
     });
 
     window.orbIsCatched = false;
     window.isOrbActive = false;
     window.isOrbCycleRunning = false;
+    window.orbSpawnTimeout = null;
   </script>
 </body>
 </html>
