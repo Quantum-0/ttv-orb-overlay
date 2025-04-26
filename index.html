@@ -27,13 +27,14 @@
   </style>
 </head>
 <body>
+  <p name="debug">test test test</p>
   <script>
     // Количество циклов появления орба в период его активности
-    const maxIterations = 5;
+    const maxIterations = 2;
     // Время респауна/неактивности орба
-    const spawnInterval = 60 * 1000;
+    const spawnInterval = 30 * 1000;
     // Время видимости орба во время одного цикла
-    const movementDuration = 10 * 1000;
+    const movementDuration = 1 * 1000;
     // Время плавного исчезновения (должно быть равно transition в CSS)
     const fadeDuration = 3 * 1000;
     // Время, в течении которого орб не видно в пробежутках между циклами видимости в активном состоянии
@@ -138,8 +139,11 @@
           window.isOrbActive = false;
           window.isOrbCycleRunning = false;
           if (window.orbIsCatched) {
-            console.log("Орб пойман! Следующий появится через 60 секунд.");
+            console.log("Орб пойман, цикл завершён.");
             window.orbIsCatched = false;
+          }
+          else {
+            console.log("Орб не был пойман, цикл появления орба закончен.");
           }
           // Schedule next cycle only if not already scheduled
           if (!window.orbSpawnTimeout) {
@@ -195,13 +199,16 @@
 
     function cmdSpawnHandler() {
       console.log("[D]: cmdSpawnHandler");
-      if (!window.isOrbCycleRunning && !window.orbSpawnTimeout) {
-        // Start a new cycle immediately
-        startOrbCycle();
-        console.log("Цикл орба принудительно запущен.");
-      } else {
-        console.log("Цикл уже активен или запланирован, игнорируем команду.");
+      if (window.isOrbCycleRunning) {
+        console.log("Цикл уже активен, игнорируем команду.");
+        return;
       }
+      if (window.orbSpawnTimeout) {
+        clearTimeout(window.orbSpawnTimeout);
+        console.log("Предыдущий таймер на респаун цикла отменён.");
+      }
+      startOrbCycle();
+      console.log("Цикл орба принудительно запущен.");
     }
 
     window.addEventListener('onEventReceived', function (obj) {
@@ -211,6 +218,8 @@
       }
       const listener = obj.detail.listener;
       const data = obj.detail.event.data;
+
+      document.getElementsByName('debug')[0].innerText = data;
 
       if (listener === 'message') {
         if (data.text === "!orb" || data.text === "!орб") {
