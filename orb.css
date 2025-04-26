@@ -1,0 +1,19 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+  height: 100%;
+}
+
+.orb {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  background: white;
+  border-radius: 50%;
+  filter: blur(5px);
+  opacity: 0;
+  transition: opacity 3s ease;
+  pointer-events: none;
+}
