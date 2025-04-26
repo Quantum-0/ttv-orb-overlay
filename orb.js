@@ -196,7 +196,7 @@ function cmdSpawnHandler() {
 // Handling twitch messages via adding as overlay in MixItUp
 function ChatMessageReceived(data)
 {
-  if (data.Message[0].Content == "!orb" or data.Message[0].Content == "!орб")
+  if (data.Message[0].Content == "!orb" || data.Message[0].Content == "!орб")
     cmdOrbHandler(data.User.DisplayName);
   if (data.Message[0].Content == "!чопоорбам")
     cmdSpawnHandler();
