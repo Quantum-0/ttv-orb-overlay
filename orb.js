@@ -2,8 +2,9 @@
 
 // Количество циклов появления орба в период его активности
 const maxIterations = 5;
-// Время респауна/неактивности орба
-const spawnInterval = 60 * 1000;
+// Время респауна/неактивности орба в миллисекундах
+const spawnMinInterval = 7 * 60 * 1000;
+const spawnMaxInterval = 15 * 60 * 1000;
 // Время видимости орба во время одного цикла
 const movementDuration = 1 * 1000;
 // Время плавного исчезновения (должно быть равно transition в CSS)
@@ -126,10 +127,11 @@ function startOrbCycle() {
       }
 
       if (!window.orbSpawnTimeout) {
+        let interval = random(spawnMinInterval, spawnMaxInterval) | 0;
         window.orbSpawnTimeout = setTimeout(() => {
           window.orbSpawnTimeout = null;
           startOrbCycle();
-        }, spawnInterval);
+        }, interval);
       }
       return;
     }
