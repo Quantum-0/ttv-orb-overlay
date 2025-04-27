@@ -2,15 +2,16 @@
 
 // Количество циклов появления орба в период его активности
 const maxIterations = 5;
-// Время респауна/неактивности орба в миллисекундах
+// Время респауна/неактивности орба в милисекундах
 const spawnMinInterval = 7 * 60 * 1000;
 const spawnMaxInterval = 15 * 60 * 1000;
 // Время видимости орба во время одного цикла
-const movementDuration = 1 * 1000;
+const movementMinDuration = 1 * 1000;
+const movementMaxDuration = 5 * 1000;
 // Время плавного исчезновения (должно быть равно transition в CSS)
 const fadeDuration = 3 * 1000;
-// Время, в течении которого орб не видно в пробежутках между циклами видимости в активном состоянии
-const pauseDuration = 5000;
+// Время, в течении которого орб не видно в пробежутках между циклами видимости в активном состоянии в милисекундах
+const pauseDuration = 4000;
 // Максимальная и минимальная начальная скорость орба
 const minStartSpeed = 25;
 const maxStartSpeed = 35;
@@ -71,6 +72,7 @@ function animateOrb(orb, onComplete) {
   function update(timestamp) {
     if (!startTime) startTime = timestamp;
     const elapsed = timestamp - startTime;
+    const movementDuration = random(movementMinDuration, movementMaxDuration) | 0;
 
     // Исчезновение в рамках одного цикла
     if (window.orbIsCatched || (elapsed > movementDuration && !fadingOut)) {
