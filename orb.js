@@ -29,8 +29,8 @@ const pullStrength = 0.005;
 // const whId = urlParams.get('id');
 
 // Вытягиваем Properties из оверлея MixItUp
-const whSecret = "{secret}"; // Секрет вебхука
-const whId = "{id}"; // ID вебхука
+const whSecret = "{whSecret}"; // Секрет вебхука
+const whId = "{whId}"; // ID вебхука
 
 
 function random(min, max) {
