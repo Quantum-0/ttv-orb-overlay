@@ -157,6 +157,7 @@ window.orbSpawnTimeout = setTimeout(() => {
 }, 1000);
 
 function callWebhookCatched(user) {
+  if (whSecret == "" || whId == "") return;
   var xhr = new XMLHttpRequest();
   xhr.open("POST", "https://api.mixitupapp.com/api/webhook/" + whId + "?secret=" + whSecret, true);
   xhr.setRequestHeader('Content-Type', 'application/json');
