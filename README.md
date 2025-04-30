@@ -1,5 +1,7 @@
 # Twitch Orb Overlay
 
+[![wakatime](https://wakatime.com/badge/github/Quantum-0/ttv-orb-overlay.svg)](https://wakatime.com/badge/github/Quantum-0/ttv-orb-overlay)
+
 Данный репозиторий представляет из себя оверлей для твича, подключаемый через [MixItUp](https://github.com/SaviorXTanren/mixer-mixitup) сделанный для [SillySnaily](https://www.twitch.tv/sillysnaily).
 
 Оверлей добавляет Орб (он же "призрачный огонёк") из Phasmophobia, появляющийся на стриме с некоторой периодичностью.
