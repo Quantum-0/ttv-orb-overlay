@@ -68,7 +68,7 @@ function animateOrb(orb, onComplete) {
   let direction = random(0, 2 * Math.PI);
   let speed = random(minStartSpeed, maxStartSpeed);
   let fadingOut = false;
-  let fadingDone = false;
+  let fadeStartTime = null;
 
   function update(timestamp) {
     if (!startTime) startTime = timestamp;
@@ -78,23 +78,26 @@ function animateOrb(orb, onComplete) {
     // Исчезновение в рамках одного цикла
     if (window.orbIsCatched || (elapsed > movementDuration && !fadingOut)) {
       fadingOut = true;
-      orb.style.opacity = 0;
-      setTimeout(() => {
-        fadingDone = true;
+      fadeStartTime = timestamp;
+      orb.style.opacity = 0; // Начинаем исчезновение
+    }
+
+    // Если орб исчезает, проверяем, прошло ли время исчезновения
+    if (fadingOut && fadeStartTime) {
+      const fadeElapsed = timestamp - fadeStartTime;
+      if (fadeElapsed >= fadeDuration) {
         orb.remove();
         onComplete();
-      }, fadeDuration);
+        return;
+      }
     }
-    if (fadingOut && fadingDone)
-      return;
 
-    // Притяжение к центру
+    // Обновляем позицию орба
     const toCenterX = centerX - x;
     const toCenterY = centerY - y;
     const angleToCenter = Math.atan2(toCenterY, toCenterX);
     direction += pullStrength * Math.sin(angleToCenter - direction);
 
-    // Случайные отклонения
     direction += random(-0.05, 0.05);
     speed += random(-2, 2);
     speed = Math.max(minSpeed, Math.min(speed, maxSpeed));
