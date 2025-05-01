@@ -77,7 +77,7 @@ function animateOrb(orb, onComplete) {
     // Исчезновение в рамках одного цикла
     if (window.orbIsCatched || (elapsed > movementDuration && !fadingOut)) {
       fadingOut = true;
-      orb.style.opacity = 0;
+      orb.style.opacity = 0.001;
       setTimeout(() => {
         orb.remove();
         onComplete();
