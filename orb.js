@@ -68,6 +68,7 @@ function animateOrb(orb, onComplete) {
   let direction = random(0, 2 * Math.PI);
   let speed = random(minStartSpeed, maxStartSpeed);
   let fadingOut = false;
+  let fadingDone = false;
 
   function update(timestamp) {
     if (!startTime) startTime = timestamp;
@@ -77,13 +78,15 @@ function animateOrb(orb, onComplete) {
     // Исчезновение в рамках одного цикла
     if (window.orbIsCatched || (elapsed > movementDuration && !fadingOut)) {
       fadingOut = true;
-      orb.style.opacity = 0.001;
+      orb.style.opacity = 0;
       setTimeout(() => {
+        fadingDone = true;
         orb.remove();
         onComplete();
       }, fadeDuration);
-      return;
     }
+    if (fadingOut && fadingDone)
+      return;
 
     // Притяжение к центру
     const toCenterX = centerX - x;
