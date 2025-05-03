@@ -6,8 +6,8 @@ const maxIterations = 5;
 const spawnMinInterval = 7 * 60 * 1000;
 const spawnMaxInterval = 15 * 60 * 1000;
 // Время видимости орба во время одного цикла
-const movementMinDuration = 1 * 1000;
-const movementMaxDuration = 5 * 1000;
+const movementMinDuration = 5 * 1000;
+const movementMaxDuration = 7 * 1000;
 // Время плавного исчезновения (должно быть равно transition в CSS)
 const fadeDuration = 3 * 1000;
 // Время, в течении которого орб не видно в пробежутках между циклами видимости в активном состоянии в милисекундах
@@ -57,6 +57,7 @@ function animateOrb(orb, onComplete) {
   const { innerWidth: width, innerHeight: height } = window;
   const centerX = width / 2;
   const centerY = height / 2;
+  const movementDuration = random(movementMinDuration, movementMaxDuration) | 0;
 
   let x = random(0, width);
   let y = random(0, height);
@@ -73,7 +74,6 @@ function animateOrb(orb, onComplete) {
   function update(timestamp) {
     if (!startTime) startTime = timestamp;
     const elapsed = timestamp - startTime;
-    const movementDuration = random(movementMinDuration, movementMaxDuration) | 0;
 
     // Исчезновение в рамках одного цикла
     if (window.orbIsCatched || (elapsed > movementDuration && !fadingOut)) {
