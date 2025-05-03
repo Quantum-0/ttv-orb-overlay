@@ -57,7 +57,7 @@ function animateOrb(orb, onComplete) {
   const { innerWidth: width, innerHeight: height } = window;
   const centerX = width / 2;
   const centerY = height / 2;
-  const movementDuration = random(movementMinDuration, movementMaxDuration) | 0;
+  const movementDuration = fadeDuration + random(movementMinDuration, movementMaxDuration) | 0;
 
   let x = random(0, width);
   let y = random(0, height);
